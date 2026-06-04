@@ -698,13 +698,24 @@ Custom keyword creations are **not reported in the API response**. They are logg
 
 ## 15. Admin Operation: Taxonomy Sync
 
-Taxonomy sync keeps Qdrant vectors updated from ResearchNodes.
+Taxonomy sync keeps Qdrant vectors populated and updated directly from the ResearchNodes API.
 
 **Implementation:** A scheduled background job or a protected admin endpoint:
 `POST /admin/taxonomy/sync`
 
-- Sync is idempotent.
-- Do not run taxonomy sync per author request.
+This endpoint must perform the following pipeline:
+1. **Fetch Fields:** Call `GET /taxonomy/fields` to retrieve all primary disciplines.
+2. **Fetch Subfields:** Call `GET /taxonomy/subfields?status=active` to retrieve all active specializations.
+3. **Fetch Keywords (Paginated):** Call `GET /keywords?page={page}&limit=1000&status=active` in a loop to retrieve all active keywords.
+4. **Embed & Upsert:** For each retrieved record:
+   - Format the record into the standard rich text block (Section 7).
+   - Generate the 4096-dim dense vector (`qwen3-embedding:8` via Ollama).
+   - Generate the sparse vector (via `fastembed` BM42).
+   - Upsert into the Qdrant `research_taxonomy` collection using a deterministic ID (e.g., `keyword::<id>`).
+
+**Rules:**
+- **Idempotency:** Because deterministic IDs are used, running the sync script multiple times safely updates existing records without creating duplicates.
+- **Trigger:** This should be run by an admin manually or via a nightly cron job. It must **never** run automatically per-author request.
 
 ---
 
