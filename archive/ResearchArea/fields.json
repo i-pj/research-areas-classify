@@ -1,0 +1,481 @@
+{
+    "success": true,
+    "count": 26,
+    "total": 26,
+    "pagination": {},
+    "data": [
+        {
+            "_id": "69c50fd73d5381dbcb55a5df",
+            "id": "https://openalex.org/fields/27",
+            "display_name": "Medicine",
+            "description": "field of study for diagnosing, treating and preventing disease",
+            "display_name_alternatives": [
+                "healthcare sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/4",
+                "display_name": "Health Sciences"
+            },
+            "works_count": 50354832,
+            "cited_by_count": 578309170,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e4",
+            "id": "https://openalex.org/fields/33",
+            "display_name": "Social Sciences",
+            "description": "academic disciplines concerned with society and the relationships between individuals in society",
+            "display_name_alternatives": [
+                "political sciences",
+                "sociology",
+                "anthropology"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/2",
+                "display_name": "Social Sciences"
+            },
+            "works_count": 48238795,
+            "cited_by_count": 182725242,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f2",
+            "id": "https://openalex.org/fields/22",
+            "display_name": "Engineering",
+            "description": "practice of using natural science, mathematics, and the engineering design process to solve technical problems",
+            "display_name_alternatives": [
+                "engineering sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 40683612,
+            "cited_by_count": 295541193,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5ee",
+            "id": "https://openalex.org/fields/12",
+            "display_name": "Arts and Humanities",
+            "description": "examination of human culture, including art, literature, philosophy, history, and artifacts",
+            "display_name_alternatives": [
+                "humanities"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/2",
+                "display_name": "Social Sciences"
+            },
+            "works_count": 25507844,
+            "cited_by_count": 47495636,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5eb",
+            "id": "https://openalex.org/fields/31",
+            "display_name": "Physics and Astronomy",
+            "description": "study of matter and its motion, along with related concepts such as energy and force",
+            "display_name_alternatives": [
+                "general physics",
+                "physical science",
+                "astrophysics"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 24442501,
+            "cited_by_count": 125289616,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e0",
+            "id": "https://openalex.org/fields/17",
+            "display_name": "Computer Science",
+            "description": "study of computation",
+            "display_name_alternatives": [
+                "CS",
+                "science of computing",
+                "information processing science",
+                "computing sciences",
+                "sciences of computing",
+                "computation science",
+                "computing",
+                "computer studies",
+                "comp sci",
+                "comp. sci",
+                "comp. sci.",
+                "compsci",
+                "informatics"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 22069484,
+            "cited_by_count": 152838106,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5ea",
+            "id": "https://openalex.org/fields/11",
+            "display_name": "Agricultural and Biological Sciences",
+            "description": "study of plant and animal biology for food, fuel, fiber, and reclamation, including environmental and economic impacts",
+            "display_name_alternatives": [
+                "scientific agriculture",
+                "agrobiology"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/1",
+                "display_name": "Life Sciences"
+            },
+            "works_count": 21510459,
+            "cited_by_count": 128529683,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e3",
+            "id": "https://openalex.org/fields/13",
+            "display_name": "Biochemistry, Genetics and Molecular Biology",
+            "description": "study of chemical processes in living organisms",
+            "display_name_alternatives": [
+                "biological chemistry",
+                "genomics",
+                "molecular biology"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/1",
+                "display_name": "Life Sciences"
+            },
+            "works_count": 19986380,
+            "cited_by_count": 297737869,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e1",
+            "id": "https://openalex.org/fields/23",
+            "display_name": "Environmental Science",
+            "description": "interdisciplinary field that studies human interaction with the environment",
+            "display_name_alternatives": [
+                "green science",
+                "environmental studies",
+                "environmental and ecological sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 16571485,
+            "cited_by_count": 152066998,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5ef",
+            "id": "https://openalex.org/fields/20",
+            "display_name": "Economics, Econometrics and Finance",
+            "description": "social science that studies the production, distribution, and consumption of goods and services",
+            "display_name_alternatives": [
+                "applied economics",
+                "financial economics"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/2",
+                "display_name": "Social Sciences"
+            },
+            "works_count": 10584823,
+            "cited_by_count": 54935625,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5dd",
+            "id": "https://openalex.org/fields/25",
+            "display_name": "Materials Science",
+            "description": "research, discovery and design of physical materials (especially solids)",
+            "display_name_alternatives": [
+                "materials science and engineering",
+                "materials of engineering and construction",
+                "material engineering"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 9340348,
+            "cited_by_count": 127891085,
+            "createdAt": "2026-03-26T10:52:07.388Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e9",
+            "id": "https://openalex.org/fields/14",
+            "display_name": "Business, Management and Accounting",
+            "description": "administration of a commercial enterprise",
+            "display_name_alternatives": [
+                "business management",
+                "business administration",
+                "corporate studies"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/2",
+                "display_name": "Social Sciences"
+            },
+            "works_count": 8649885,
+            "cited_by_count": 60980584,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e2",
+            "id": "https://openalex.org/fields/32",
+            "display_name": "Psychology",
+            "description": "study of mental functions and behaviours",
+            "display_name_alternatives": [],
+            "domain": {
+                "id": "https://openalex.org/domains/2",
+                "display_name": "Social Sciences"
+            },
+            "works_count": 8225121,
+            "cited_by_count": 95904099,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e6",
+            "id": "https://openalex.org/fields/19",
+            "display_name": "Earth and Planetary Sciences",
+            "description": "all fields of natural science related to the planet Earth and other planets",
+            "display_name_alternatives": [
+                "geosciences",
+                "planetary sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 7551081,
+            "cited_by_count": 67630160,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f0",
+            "id": "https://openalex.org/fields/36",
+            "display_name": "Health Professions",
+            "description": "field encompassing a wide range of disciplines focused on health care, treatment, and advice, including public health and occupational therapy",
+            "display_name_alternatives": [
+                "health sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/4",
+                "display_name": "Health Sciences"
+            },
+            "works_count": 7457601,
+            "cited_by_count": 39397487,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5de",
+            "id": "https://openalex.org/fields/16",
+            "display_name": "Chemistry",
+            "description": "branch of physical science concerned with the composition, structure and properties of matter",
+            "display_name_alternatives": [
+                "chemical sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 6782371,
+            "cited_by_count": 84961001,
+            "createdAt": "2026-03-26T10:52:07.389Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f5",
+            "id": "https://openalex.org/fields/26",
+            "display_name": "Mathematics",
+            "description": "area of knowledge that includes the topics of numbers, formulas and related structures, shapes and the spaces in which they are contained, and quantities and their changes",
+            "display_name_alternatives": [],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 4272317,
+            "cited_by_count": 41957157,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e5",
+            "id": "https://openalex.org/fields/28",
+            "display_name": "Neuroscience",
+            "description": "scientific study of the nervous system",
+            "display_name_alternatives": [
+                "neurobiology",
+                "cognitive neuroscience"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/1",
+                "display_name": "Life Sciences"
+            },
+            "works_count": 4202359,
+            "cited_by_count": 93047574,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f1",
+            "id": "https://openalex.org/fields/18",
+            "display_name": "Decision Sciences",
+            "description": "branch of applied probability theory",
+            "display_name_alternatives": [
+                "decision theory",
+                "theory of choice",
+                "operations research"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/2",
+                "display_name": "Social Sciences"
+            },
+            "works_count": 3281775,
+            "cited_by_count": 30002364,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e8",
+            "id": "https://openalex.org/fields/24",
+            "display_name": "Immunology and Microbiology",
+            "description": "study of the immune system and microorganisms, including their roles in health and disease",
+            "display_name_alternatives": [
+                "allergy and immunology",
+                "microbial sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/1",
+                "display_name": "Life Sciences"
+            },
+            "works_count": 2758384,
+            "cited_by_count": 49696148,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5ed",
+            "id": "https://openalex.org/fields/21",
+            "display_name": "Energy",
+            "description": "study of energy in physical systems, its sources, technology, management, and impact on sustainability",
+            "display_name_alternatives": [
+                "energy studies",
+                "energy science and technology"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 1802672,
+            "cited_by_count": 25590910,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f6",
+            "id": "https://openalex.org/fields/29",
+            "display_name": "Nursing",
+            "description": "caring for people who are sick or injured",
+            "display_name_alternatives": [],
+            "domain": {
+                "id": "https://openalex.org/domains/4",
+                "display_name": "Health Sciences"
+            },
+            "works_count": 1292560,
+            "cited_by_count": 16478113,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f4",
+            "id": "https://openalex.org/fields/30",
+            "display_name": "Pharmacology, Toxicology and Pharmaceutics",
+            "description": "branch of biology concerning drugs",
+            "display_name_alternatives": [
+                "therapeutics",
+                "pharmaceutical sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/1",
+                "display_name": "Life Sciences"
+            },
+            "works_count": 1093452,
+            "cited_by_count": 12271148,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5ec",
+            "id": "https://openalex.org/fields/35",
+            "display_name": "Dentistry",
+            "description": "branch of medicine dealing with oral health and teeth",
+            "display_name_alternatives": [
+                "dental medicine",
+                "oral medicine",
+                "oral health sciences"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/4",
+                "display_name": "Health Sciences"
+            },
+            "works_count": 963128,
+            "cited_by_count": 11307583,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5e7",
+            "id": "https://openalex.org/fields/15",
+            "display_name": "Chemical Engineering",
+            "description": "branch of science that applies physical sciences and life sciences together with applied mathematics and economics to produce, transform, transport, and properly use chemicals, materials and energy",
+            "display_name_alternatives": [
+                "process engineering",
+                "chemical process engineering"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/3",
+                "display_name": "Physical Sciences"
+            },
+            "works_count": 878131,
+            "cited_by_count": 12744208,
+            "createdAt": "2026-03-26T10:52:07.390Z",
+            "__v": 0
+        },
+        {
+            "_id": "69c50fd73d5381dbcb55a5f3",
+            "id": "https://openalex.org/fields/34",
+            "display_name": "Veterinary",
+            "description": "branch of medicine that deals with the prevention, management, diagnosis, and treatment of disease, disorder, and injury in non-human animals",
+            "display_name_alternatives": [
+                "veterinary science",
+                "veterinary medicine"
+            ],
+            "domain": {
+                "id": "https://openalex.org/domains/4",
+                "display_name": "Health Sciences"
+            },
+            "works_count": 487390,
+            "cited_by_count": 4521171,
+            "createdAt": "2026-03-26T10:52:07.391Z",
+            "__v": 0
+        }
+    ]
+}

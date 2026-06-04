@@ -1,0 +1,21 @@
+dekh bhai hamera pass me user ki infomation aa rahi h user ki infomation hame hameri journals web site ke data base se api ke help se milti h 
+1. Global Journal - GJ 
+2. Journal press - LJP
+ or mautic hamara marketing platform se milti h ham iske basis par user ki profile create karte h uske liye hame n8n flow bana rakha h jaha par ham api call kar data get kar ke llm ko de ke usse user ki details profile complete karwate h ab hame user ki detail flow se rakh me uska reaseach area bhi pata karna h, research area jo h usko hame 3 part me divide kar rakha h 
+ 1st part he h Primary Research Disciplines --- Fields.json se value aayegi iski (https://uni.researchnodes.com/api-docs/#tag/taxonomy)
+ 2nd part he Research Specializations --- subfields.json se value aygi eski (https://uni.researchnodes.com/api-docs/#tag/taxonomy)
+ 3rd part he Research Keywords & Themes --- keywords.json se value aygi eski Doc of Api. (https://uni.researchnodes.com/api-docs/#tag/keywords)
+pehla kam abhi to aap check karo or ek plan tayar karo 
+dusra kam jo reponse mene diya h uski basis par aap ek bar try karo karo or muje isse user ki 3no chize generate kar ke batao 
+
+hame iss n8n flow me lagana h taki ham har user ke liye ye details nikal sake or agar kisi user ki koi bhi detail missing h to ham usse genetate karnge and store kar ke update karnege user ki profile me 
+
+ab mene jo socha h ye kam karne ke liye logic vo kuch esa h 
+ham pehele ye sab deta ko qdrant vector me store kar lenege then agent ki help se ham iss data me query kar ke sari details fetch kar ke return karenge 
+agar koi custom field hogi to bhi agent return karege usko hame api chal ke data base me create kar ke phir user profile me upadate kar denege api ki help se 
+or har run par ham ek bar custom feild ke liye update ki api call kar lenge jisse qdrant hamesa latest hi rahe 
+iske alawa ham ek verifier lagana pad sakta jo ki fetch details ko ek bar verify kar ke pata kar le ki sab sahi chal raha h 
+n8n flow 
+/Users/apple/Development/NewPaperMetaExtractor/000_CompleteAuthorProfile/authorProfileFlow.json
+
+

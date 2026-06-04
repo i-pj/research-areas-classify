@@ -1,0 +1,50 @@
+[
+  {
+    "country": null,
+    "posts": [],
+    "article_details": [
+      {
+        "primary_author_name": "Yicheng Li",
+        "primary_author_email": "liyicheng070@ujs.edu.cn",
+        "author_university": "<p>Jiangsu University</p>\n",
+        "author_country": "China",
+        "address_confirm": "Address is not confirmed Yet",
+        "article_title": "NMLoNet: An End-to-End Intelligent Vehicle Localization Network Using Navigation Maps",
+        "article_abstract": "<p>Accurate and reliable localization is crucial for advanced autonomous driving systems. Traditional high-precision localization approaches rely on meticulously annotated high-definition (HD) maps and employ visual-geometric methods to derive accurate pose information. However, the construction, maintenance, and updating of HD maps are costly and time-consuming. In contrast, localization using publicly available navigation maps provides a low-cost and scalable alternative. Existing methods typically align BEV (Bird’s-Eye-View) features extracted from surround-view images with navigation maps to obtain localization results. Although such approaches can achieve high accuracy, they often neglect the inherent modality gap between BEV features and navigation maps, leading to localization errors. To address this issue, we propose NMLoNet, an end-to-end intelligent vehicle localization network that leverages navigation maps. The proposed method exploits road semantic elements to effectively bridge the modality gap between BEV representations and navigation maps. Specifically, a Deformable Attention Module is introduced after BEV feature extraction to capture long-range dependencies among BEV features. Furthermore, we innovatively incorporate vector map constraints to minimize the discrepancy between BEV and navigation map features. In addition, a multi-level cross-modal feature registration mechanism is designed to achieve more precise alignment between BEV and map representations. Extensive experiments on the nuScenes and Argoverse datasets demonstrate that NMLoNet achieves state-of-the-art performance, improving localization accuracy by approximately 11% under monocular settings and 24% under surround-view configurations. Moreover, the proposed network maintains robust localization performance in complex and highly dynamic driving environments.</p>\n",
+        "article_keywords": "bird’s-eye-view, high-precision localization, Intelligent Vehicles, navigation map, visual localization",
+        "article_added_on_crm_date": "01/15/2026",
+        "article_accepted_date": "01/24/2026",
+        "article_accepted_status": "Article is under review",
+        "review_report_download_link": "https://manuscripts.globaljournals.org/gv75p8_159762/nmlonet-an-end-to-end-intelligent-vehicle-localization-network-using-navigation-maps_raar_report.pdf",
+        "comments_pdf_link": "https://manuscripts.globaljournals.org/gv75p8_159762/nmlonet-an-end-to-end-intelligent-vehicle-localization-network-using-navigation-maps_reviewer_comment.pdf",
+        "classification": "[{\"symbol\":\"LCC\",\"code\":\"TK5105.59\"},{\"symbol\":\"ACM\",\"code\":\"I.2.10\"},{\"symbol\":\"IEEE\",\"code\":\"8.8\"},{\"symbol\":\"arXiv\",\"code\":\"cs.CV\"},{\"symbol\":\"arXiv\",\"code\":\"cs.RO\"}]",
+        "journal_title": "Global Journal of Computer Science and Technology - E: Network, Web &amp; Security",
+        "journal_abbreviation": "GJCST",
+        "journal_part_id": "E",
+        "journal_part_name": "Network, Web and Security",
+        "volume_title": "GJRE-B Volume 25",
+        "volume_number": "25",
+        "issue_title": "GJRE Volume 26 Issue B1",
+        "issue_number": "1",
+        "issue_status": "The Issue has not been launched in e-journal",
+        "reminder_status": "No payment reminder sent yet"
+      }
+    ],
+    "output": {
+      "author": {
+        "full_name": "Yicheng Li",
+        "primary_email": "liyicheng070@ujs.edu.cn",
+        "emails": [
+          "liyicheng070@ujs.edu.cn"
+        ],
+        "email": "liyicheng070@ujs.edu.cn"
+      },
+      "personal_info": {},
+      "social_media": {},
+      "affiliations_work_experience": [],
+      "education": [],
+      "research_areas": [],
+      "memberships": []
+    }
+  }
+]

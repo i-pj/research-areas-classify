@@ -1,0 +1,97 @@
+{
+    "user_id": 38336,
+    "basic_information": {
+        "prefix": "Dr.",
+        "first_name": "Anil",
+        "middle_name": "D",
+        "last_name": "Kushwah",
+        "suffix": "PhD",
+        "display_name": "Dr. Anil D Kushwah, PhD",
+        "email": "anil@softinator.com",
+        "city": "Indore",
+        "country": "India",
+        "phone_number": "514-343-6804"
+    },
+    "biography": "Anil Kushwah is the lead researcher and corresponding author of this study. He conceptualized the framework, supervised the research, and led the network architecture design at Chameli Devi Group of Institutions.",
+    "academic_ids": {
+        "orcid": "0000-0002-1825-0097",
+        "research_gate_url": null,
+        "google_scholar_url": null
+    },
+    "social_links": {
+        "linkedin": null,
+        "twitter": null,
+        "website": null,
+        "facebook": null,
+        "instagram": null
+    },
+    "affiliations": [
+        {
+            "institution": "Chameli Devi Group of Institutions",
+            "location": "Indore, India",
+            "university": "",
+            "department": "",
+            "position_role": "Lead Investigator",
+            "start_year": "",
+            "end_year": "present",
+            "institution_open_alex_id": "https://openalex.org/I4210139833",
+            "university_open_alex_id": "",
+            "is_current": true
+        }
+    ],
+    "education": [
+        {
+            "institution": "McGill University",
+            "degree": "Ph.D. in Computer Science",
+            "year": "1991",
+            "institution_open_alex_id": null
+        }
+    ],
+    "research_areas": "Deep Learning, Statistical Learning Algorithms, Neural Networks, Representation Learning, Recurrent Neural Networks, Natural Language Processing, Generative Models, Brain-inspired Learning.",
+    "patents": [
+        "Z-coder : a fast adaptive binary arithmetic coder. U.S. Patent 6,188,334",
+        "Module for constructing trainable modular network in which each module outputs and inputs data structured as a graph. U.S. Patent 6,128,606",
+        "Visitor registration system using automatic handwriting recognition. U.S. Patent Submission 1-16-18-1"
+    ],
+    "editor_roles": [
+        {
+            "role": "Director",
+            "journal": "Bhagwan Barose",
+            "start_year": 2000,
+            "is_current": true
+        }
+    ],
+    "memberships": [
+        {
+            "organization": "IEEE",
+            "membership_type": "Member",
+            "start_year": 1950,
+            "is_current": true
+        }
+    ],
+    "advisors": [
+        {
+            "name": "Mukesh",
+            "role": "Advisor",
+            "institution": "Unknown",
+            "institution_open_alex_id": null
+        }
+    ],
+    "advisees": [
+        {
+            "name": "Anil",
+            "degree": "Unknown",
+            "status": "Ongoing"
+        }
+    ],
+    "grants_awards": [
+        {
+            "title": "Research Grant",
+            "type": "Grant",
+            "funding_source": "Suyog Sir",
+            "start_year": 1950,
+            "end_year": null,
+            "amount": "782318792348712347891234789123"
+        }
+    ]
+}

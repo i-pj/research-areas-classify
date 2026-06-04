@@ -1,0 +1,19 @@
+[
+  {
+    "connectionSuccess": true,
+    "foundInTheDatabase": true,
+    "authorData": {
+      "lastName": "Yicheng Li",
+      "dateModified": "2026-05-18T09:15:27+00:00",
+      "university": "Jiangsu University",
+      "country": "China",
+      "titleOfPaper": "Nmlonet An End-to-End Intelligent Vehicle Localization Network Using Navigation Maps",
+      "titleOfPaper2": "Pedestrian Multi-Object Tracking Combining Appearance and Spatial Characteristics",
+      "titleOfPaper3": "Robust Pedestrian Multi-Object Tracking in the Intelligent Bus Environment",
+      "titleOfPaper4": null,
+      "titleOfPaper5": null,
+      "validationStatus": "Already Exists",
+      "interspireLastSent": null
+    }
+  }
+]
