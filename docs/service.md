@@ -216,8 +216,16 @@ The FastAPI service on Dokploy communicates with Ollama and Qdrant on the Mac vi
 | Model | Purpose | Ollama Tag |
 |---|---|---|
 | Qwen3-Embedding-8B | Dense embedding generation (512 + 4096 dim via MRL) | `qwen3-embedding:8` |
-| Qwen3-Reranker-4B | Cross-encoder reranking of retrieved candidates | `dengcao/Qwen3-Reranker-4B:Q5_K_M` |
 | Gemma4-12B | LLM for taxonomy selection and data cleaning | `gemma4:12b` |
+
+**Total estimated VRAM:** ~20GB (well within 64GB unified memory on M2)
+
+### Models hosted via FastEmbed (Dokploy CPU)
+
+| Model | Purpose |
+|---|---|
+| `Qdrant/bm25` | BM25 sparse vectors |
+| `colbert-ir/colbertv2.0` | ColBERT late interaction (128-dim per-token) |
 
 ### Embedding model details
 
@@ -226,11 +234,9 @@ The FastAPI service on Dokploy communicates with Ollama and Qdrant on the Mac vi
 - Matryoshka Representation Learning (MRL) — supports lower-dimension projections of the same embedding.
 - Handles academic terminology and native abbreviation resolution without manual regex tables.
 
-### Reranking model details
-
-**`dengcao/Qwen3-Reranker-4B:Q5_K_M`** (via Ollama)
-- Instruction-aware cross-encoder.
-- Reranks retrieved candidates before LLM selection.
+**FastEmbed Models** (BM25 + ColBERT)
+- Executed locally on Dokploy to save network round-trips for token-level embeddings.
+- Native NumPy array manipulation for token matrices (transitive via ONNX/FastEmbed).
 
 ### LLM details
 
@@ -254,31 +260,32 @@ The Qdrant collection stores **taxonomy records only**. Author data is never sto
 {
   "vectors": {
     "dense_512": { "size": 512, "distance": "Cosine" },
-    "dense_4096": { "size": 4096, "distance": "Cosine" }
+    "dense_4096": { "size": 4096, "distance": "Cosine" },
+    "colbert": { "size": 128, "distance": "Cosine", "multivector_config": {"comparator": "MaxSim"} }
   },
   "sparse_vectors": {
-    "bm42": {}
+    "bm25": {}
   }
 }
 ```
 
 **`dense_512`** — fast first-pass retrieval.
 **`dense_4096`** — precise reranking of the shortlist.
-**`bm42`** — Sparse neural retriever. Captures exact taxonomy term matches (eliminating the need for live API queries during classification).
+**`bm25`** — Sparse neural retriever. Captures exact taxonomy term matches with IDF modifier.
+**`colbert`** — Late-interaction multivector representation for highly precise token-level scoring (HNSW index disabled `m=0` since it's only used for rescoring).
 
 ### Hybrid query pattern (executed per kind: field, subfield, keyword)
 
-```python
 results = client.query_points(
     collection_name="research_taxonomy",
     prefetch=[
         models.Prefetch(query=dense_512_vector, using="dense_512", limit=100),
-        models.Prefetch(query=sparse_vector, using="bm42", limit=100)
+        models.Prefetch(query=sparse_vector, using="bm25", limit=100)
     ],
-    query=dense_4096_vector,
-    using="dense_4096",
+    query=models.FusionQuery(fusion=models.Fusion.RRF),
     limit=50
 )
+# Note: Results are then rescored using the colbert vector.
 ```
 
 ### Point ID format
@@ -381,10 +388,10 @@ To prevent n8n timeouts, deduplicate the extracted paper titles and **take a max
 
 ### Step 1: OpenAlex Paper Search (Max 3 queries)
 
-> **Important (Polite Pool):** All OpenAlex HTTP requests must include the `mailto: parth@softinator.com` query parameter (or header) to access the faster Polite Pool.
+> **Important (API Key):** OpenAlex polite pool (mailto) was deprecated Feb 13, 2026. API key authentication is now mandatory for the high-performance tier.
 
 ```
-GET https://api.openalex.org/works?filter=title.search:{url_encoded_title}&per_page=1&select=id,title,topics,keywords,authorships&mailto=parth@softinator.com
+GET https://api.openalex.org/works?filter=title.search:{url_encoded_title}&per_page=1&select=id,title,topics,keywords,authorships&api_key={openalex_api_key}
 ```
 **If a match is found (≥ 0.85 title similarity):**
 - Extract `topics[]` (pre-classified taxonomy records with confidence scores). Treat them as strong candidates with a score boost in the merge step.
@@ -403,12 +410,12 @@ Search for the author on OpenAlex to get their full academic profile.
 
 **Option A — If author ID was found via paper search (Step 1):**
 ```
-GET https://api.openalex.org/authors/{author_id}?select=id,orcid,display_name,affiliations,topics,works_count,cited_by_count,counts_by_year&mailto=parth@softinator.com
+GET https://api.openalex.org/authors/{author_id}?select=id,orcid,display_name,affiliations,topics,works_count,cited_by_count,counts_by_year&api_key={openalex_api_key}
 ```
 
 **Option B — Search by name + institution:**
 ```
-GET https://api.openalex.org/authors?filter=display_name.search:{author_name}&per_page=5&select=id,orcid,display_name,affiliations,topics,works_count&mailto=parth@softinator.com
+GET https://api.openalex.org/authors?filter=display_name.search:{author_name}&per_page=5&select=id,orcid,display_name,affiliations,topics,works_count&api_key={openalex_api_key}
 ```
 Then match the correct author by comparing institution names.
 
@@ -450,7 +457,7 @@ When the same field (e.g., affiliations) is available from multiple sources, app
 For research classification, apply additive boosts during candidate scoring:
 - OpenAlex topic match: +0.15
 - Classification hint match (arXiv/ACM codes): +0.10
-- BM42 sparse match: +0.05
+- BM25 sparse match: +0.05
 
 ---
 
@@ -493,6 +500,8 @@ The n8n workflow already has access to all the CRM/Mautic/legacy data. Copying t
 ### What to return if nothing is found externally
 
 If the author is not found on any external platform, `author_details` should contain only the `user_id` and empty/null fields. Do not fall back to copying input data — n8n already has it.
+
+Use `response_model_exclude_none=True` on the FastAPI endpoint or `model_dump(exclude_none=True)` to dynamically filter out empty fields during serialization.
 
 ### Output schema
 
@@ -580,7 +589,7 @@ Run three separate hybrid queries (`field`, `subfield`, `keyword`).
 
 **Advanced Embedding Specifications:**
 1. **Matryoshka Representation Learning (MRL):** Use a two-stage Qdrant search. Qdrant quickly fetches the top 100 candidates using a smaller `512-dimension` vector (oversampling), and then automatically rescores them using the full `4096-dimension` vector. This maximizes both speed and accuracy.
-2. **Reciprocal Rank Fusion (RRF):** For the hybrid search (Sparse BM42 + Dense 4096), use Qdrant's native RRF instead of raw score addition. This prevents exact-keyword matches (which have massive sparse scores) from completely overpowering deep semantic matches.
+2. **Reciprocal Rank Fusion (RRF):** For the hybrid search (Sparse BM25 + Dense 4096), use Qdrant's native RRF instead of raw score addition. This prevents exact-keyword matches (which have massive sparse scores) from completely overpowering deep semantic matches.
 3. **Instruction Prefixes:** When talking to the Ollama embedding model, explicitly prefix the query evidence with: *"Retrieve corresponding research taxonomy categories for the following academic profile: "* to activate its instruction-aware capabilities.
 
 ### Stage 5 — Candidate Merge & Scoring
@@ -588,9 +597,12 @@ After Qdrant returns the RRF-fused results, assign additive boosts based on exte
 - OpenAlex topic match: +0.15
 - Classification hint match (e.g., arXiv cs.CV): +0.10
 
-### Stage 6 — Reranking
-Run the Cross-Encoder Reranker separately for fields (all), subfields (top 20), and keywords (top 50).
-`final_score = (reranker_score × 0.6) + (composite_score × 0.4)`
+### Stage 6 — ColBERT Late Interaction Rescoring
+### Stage 6 — ColBERT Late Interaction Rescoring
+Pass the FastEmbed-generated query multivector to Qdrant's native query API to rescore the RRF-fused shortlist. **FastEmbed is only used to encode the query tensor on Dokploy**; the actual token-level MaxSim comparison is executed natively by Qdrant.
+`final_score = (colbert_maxsim × 0.6) + (composite_score × 0.4)`
+
+> **Note on Weights:** The scoring weights (`0.6` ColBERT / `0.4` Composite) are **initial estimates**. These values must be empirically tuned (e.g., evaluating NDCG@k on a held-out query dataset). They are configurable via `pydantic-settings` without code changes.
 
 ### Stage 7 — LLM Selection
 Pass the tiered evidence text and top reranked candidates to the LLM (gemma4:12b via Ollama).
@@ -643,10 +655,18 @@ When the Qdrant retrieval pipeline cannot find suitable existing matches for an 
 
 1. **LLM identifies unresolved phrases**: During Stage 7 (LLM Selection), if the LLM determines that a research area phrase has no suitable match among the retrieved candidates, it marks it as an `unresolved_custom_candidate` with a suggested `field_id`, `subfield_id`, and a clean keyword name.
 
-2. **Create via `POST /keywords`**: The service calls the ResearchNodes API:
-   ```http
-   POST https://uni.researchnodes.com/keywords
-   x-api-secret: <RESEARCHNODES_API_SECRET>
+2. **Create via `POST /keywords`**: The service uses Redis distributed locks to prevent race conditions. To prevent duplicates from case or punctuation differences, the keyword is normalized before hashing (lowercase, strip punctuation, alphabetize words):
+   ```python
+   def normalize(text: str) -> str:
+       # Lowercase, strip punctuation, split into words, sort, join
+       pass
+       
+   hash = hashlib.md5(normalize(keyword_name).encode()).hexdigest()
+   lock = redis_client.lock(f"lock:keyword:{hash}", timeout=30, blocking_timeout=5)
+   
+   async with lock:
+       # Check existence again, then call ResearchNodes API
+       # POST https://uni.researchnodes.com/keywords
    ```
    ```json
    {
@@ -660,7 +680,7 @@ When the Qdrant retrieval pipeline cannot find suitable existing matches for an 
 
 3. **Immediately embed in Qdrant**: After successful creation, the new keyword must be:
    - Converted to the taxonomy text format (Section 7).
-   - Embedded using `qwen3-embedding:8` (dense_512 + dense_4096 + BM42 sparse).
+   - Embedded using `qwen3-embedding:8` (dense_512 + dense_4096) and FastEmbed (BM25 + ColBERT).
    - Inserted into the `research_taxonomy` Qdrant collection with point ID `keyword::<new_id>`.
    - This ensures future requests can match against this keyword without waiting for a full taxonomy sync.
 
@@ -710,7 +730,7 @@ This endpoint must perform the following pipeline:
 4. **Embed & Upsert:** For each retrieved record:
    - Format the record into the standard rich text block (Section 7).
    - Generate the 4096-dim dense vector (`qwen3-embedding:8` via Ollama).
-   - Generate the sparse vector (via `fastembed` BM42).
+   - Generate the sparse vector (BM25) and multivector (ColBERT) via `fastembed`.
    - Upsert into the Qdrant `research_taxonomy` collection using a deterministic ID (e.g., `keyword::<id>`).
 
 **Rules:**
@@ -827,8 +847,9 @@ This endpoint must perform the following pipeline:
 ## 18. Implementation Phases
 
 **Phase 1 — Infrastructure & Sync Script**
-- Set up Qdrant on Mac M2 with `dense_512`, `dense_4096`, and `bm42`.
-- Set up Ollama models (verify embedding generation, reranking, and LLM responses).
+- Set up Redis for distributed locks and semantic caching.
+- Set up Qdrant on Mac M2 with 4-vector schema (`dense_512`, `dense_4096`, `bm25`, `colbert`).
+- Set up Ollama models (verify embedding generation and LLM responses).
 - Build the `POST /admin/taxonomy/sync` script to embed all taxonomy records using deterministic IDs.
 - Set up FastAPI project on Dokploy with environment variables for Ollama/Qdrant endpoints.
 
@@ -844,7 +865,8 @@ This endpoint must perform the following pipeline:
 - Implement LLM-based data cleaning (via gemma4:12b).
 
 **Phase 4 — Classification Pipeline**
-- Implement hybrid Qdrant retrieval and reranking.
+- Implement hybrid Qdrant retrieval (dense + BM25).
+- Implement ColBERT late interaction rescoring.
 - Implement LLM selection with `instructor` + Pydantic structured outputs.
 - Implement `HierarchyValidator`.
 
@@ -856,3 +878,6 @@ This endpoint must perform the following pipeline:
 **Phase 6 — Custom Keyword Logging**
 - Set up `custom_keywords_log.jsonl` file-based audit trail for all auto-created keywords.
 - Monitor log for quality control of auto-created keywords.
+
+**Phase 7 — Observability & Monitoring**
+- Integrate Logfire instrumentation for FastAPI, OpenAI/Ollama clients, and custom pipeline spans.

@@ -139,6 +139,8 @@ The `old_crm_data` object contains 300+ fields from the legacy CRM. Most are irr
 
 ### Input fields used as search keys
 
+*Note: Accessing the OpenAlex high-performance tier requires configuring a mandatory `api_key`. The legacy `mailto` polite pool was deprecated in Feb 2026.*
+
 | Input Field | Used To |
 |---|---|
 | `basic_information.first_name` + `last_name` | Search OpenAlex/ORCID/Semantic Scholar by author name |
