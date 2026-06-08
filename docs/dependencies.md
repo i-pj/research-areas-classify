@@ -1,6 +1,6 @@
 Here is the dependency stack for this service, formatted for a modern `pyproject.toml` (PEP 621 standard, compatible with `uv`, `poetry`, or `hatch`).
 
-This stack is carefully selected to support **Async processing**, **BM42 sparse vectors**, **Structured Outputs**, **Fuzzy Matching**, and **Ollama-hosted models** with minimal bloat.
+This stack is carefully selected to support **Async processing**, **BM25 sparse vectors**, **ColBERT late interaction**, **Structured Outputs**, **Fast HTTP Caching**, and **Ollama-hosted models** with minimal bloat.
 
 ### `pyproject.toml`
 ```toml
@@ -8,36 +8,50 @@ This stack is carefully selected to support **Async processing**, **BM42 sparse 
 name = "research-taxonomy-service"
 version = "0.1.0"
 description = "FastAPI service for academic research area classification and author profile enrichment"
-requires-python = ">=3.11"
+readme = "README.md"
+requires-python = ">=3.12"
+
 dependencies = [
     # --- Core Web Framework ---
-    "fastapi>=0.111.0",           # High-performance async web framework
-    "uvicorn[standard]>=0.30.1",  # ASGI server for FastAPI
-    "pydantic>=2.7.0",            # Core data validation & JSON schemas (v2 is written in Rust, extremely fast)
+    "fastapi>=0.136.0",          # SOTA async web framework
+    "granian>=1.6.0",            # Rust-based ASGI server (massive throughput lift over Uvicorn)
+    "pydantic>=2.9.0",           # Core data validation (Rust-backed pydantic-core)
+    "pydantic-settings>=2.5.0",  # Type-safe environment variable management
 
     # --- LLM & Structured Outputs ---
-    "instructor>=1.3.0",          # SOTA for forcing LLMs to return 100% valid Pydantic JSON
-    "openai>=1.30.0",             # Standard client (Instructor wraps this; Ollama exposes OpenAI-compatible API)
+    "instructor>=1.7.0",         # Forces LLMs to return valid Pydantic JSON (from_provider API)
+    "openai>=1.50.0",            # Standard client (Instructor wraps this for Ollama compatibility)
+    "litellm>=1.55.0",           # LLM Routing (Ollama local -> OpenRouter cloud fallback)
 
     # --- Vector DB & Retrieval ---
-    "qdrant-client>=1.9.0",       # Native Qdrant client
-    "fastembed>=0.3.1",           # SOTA lightweight embedding generation. Natively supports BM42 and BGE models without needing massive PyTorch installations.
+    "qdrant-client>=1.12.0",     # Native Qdrant client (supports multivector MAX_SIM)
+    "fastembed>=0.4.1",          # lightweight embedding generation (Dense, BM25, and ColBERT)
 
     # --- Async Network & API Resilience ---
-    "httpx>=0.27.0",              # SOTA async HTTP client (for concurrent OpenAlex/Semantic Scholar/ORCID requests)
-    "tenacity>=8.3.0",            # SOTA retry logic (handles exponential backoff and circuit breaking for external APIs)
+    "httpx>=0.28.0",             # async HTTP client
+    "hishel>=0.0.30",            # RFC 9111 HTTP Cache (wraps httpx to cache OpenAlex/S2 calls)
+    "tenacity>=9.0.0",           # retry logic (exponential backoff and circuit breaking)
 
-    # --- Caching & Utility ---
-    "redis>=5.0.4",               # Async Redis client for Semantic Caching
-    "rapidfuzz>=3.9.0",           # SOTA string matching (written in C++, 100x faster than FuzzyWuzzy, used for 0.85 OpenAlex title similarity)
-    "python-dotenv>=1.0.1"        # Secure environment variable management
+    # --- Domain API Clients ---
+    "pyalex>=0.14.0",            # Official OpenAlex client
+    "semanticscholar>=0.8.4",    # Official Semantic Scholar client
+
+    # --- Caching, Matching & Observability ---
+    "redis[hiredis]>=5.2.0",     # Async Redis client for Hishel cache and distributed locks
+    "rapidfuzz>=3.11.0",         # C++ string matching (used for 0.85 OpenAlex title similarity)
+    "logfire>=4.34.0",           # OpenTelemetry observability (traces FastAPI, Instructor, LLM)
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.4.5",                # SOTA Linter/Formatter (replaces flake8, black, isort - written in Rust)
+    "ruff>=0.4.5",                # Linter/Formatter (replaces flake8, black, isort - written in Rust)
+    "pyright>=1.1.365",           # Strict static type checking
     "pytest>=8.2.0",
-    "pytest-asyncio>=0.23.6"
+    "pytest-asyncio>=0.23.6",
+    "pytest-httpx>=0.30.0",       # Mocking httpx calls in tests
+    "polyfactory>=2.16.0",        # Mock data generation
+    "anyio[trio]>=4.4.0",         # Async concurrency testing
+    "coverage[toml]>=7.5.0"
 ]
 ```
 
@@ -45,65 +59,57 @@ dev = [
 
 ### Why these specific packages? (The Rationale)
 
-**1. `instructor` (The LLM Savior)**
-You *do not* want to parse raw strings from an LLM. `instructor` acts as a wrapper around the OpenAI SDK. You simply pass it your `TaxonomyResponse` Pydantic model, and it guarantees that the LLM returns exactly those arrays, or it automatically retries and fixes the JSON for you. **Because Ollama exposes an OpenAI-compatible API**, `instructor` works seamlessly with it — just point the OpenAI client's `base_url` to `http://<mac-ip>:11434/v1`.
+**1. `granian` (The ASGI Server)**
+`granian` is a Rust-based HTTP server for Python applications. It provides native HTTP/2 support, built-in process management, and significantly higher throughput than `uvicorn`. No `gunicorn` wrapper is needed. You simply run: `granian --interface asgi --workers 4 main:app`.
 
-**2. `openai` (Ollama Compatibility Layer)**
-We use the standard `openai` Python client not because we're calling OpenAI's cloud API, but because **Ollama provides an OpenAI-compatible `/v1/chat/completions` endpoint**. This means we can use `instructor` + `openai` to talk to `gemma4:12b` on Ollama as if it were GPT-4. No separate Ollama SDK needed.
+**2. `pydantic` Serialization**
+FastAPI natively uses Pydantic v2's Rust-based `pydantic-core` for extremely fast JSON serialization. **We explicitly DO NOT use `ORJSONResponse` as the default FastAPI response class because it is deprecated.**
 
-**3. `fastembed` (The Infrastructure Cheat Code)**
-This library is built and maintained by the Qdrant team. Instead of downloading heavy, 5GB PyTorch/Transformers dependencies to run your embedding models, `fastembed` runs highly optimized ONNX runtimes. More importantly, **it natively generates BM42 sparse vectors**. 
+**3. NumPy vs. Polars (Data Manipulation)**
+We **exclusively use NumPy** and **reject Polars**.
+- **Why NumPy:** It is already a transitive dependency installed by `fastembed` and `onnxruntime`. We use it for lightweight multi-dimensional vector array operations and slicing (e.g., MRL projection).
+- **Why not Polars:** The service processes single-author JSON payloads (online transactions). It performs zero tabular data manipulation. Including a heavy Rust-based dataframe library like Polars would needlessly increase the container size and memory footprint without providing any functional benefit.
 
-**Note on Qwen3-Embedding-8B:** The `qwen3-embedding:8` model is hosted on Ollama and accessed via the Ollama embeddings API (`/api/embeddings` or the OpenAI-compatible `/v1/embeddings`). `fastembed` may be used as a fallback for BM42 sparse vector generation if needed (using `BAAI/bge-m3`).
+**4. `fastembed` (The CPU Infrastructure Cheat Code)**
+Built by the Qdrant team, `fastembed` uses ONNX runtimes to run embeddings on the Dokploy server CPU without the bloat of PyTorch. It supports three distinct vector types:
+1. Dense Embeddings (can also use `qwen3-embedding:8` via Ollama)
+2. Sparse BM25 via `SparseTextEmbedding("Qdrant/bm25")`
+3. ColBERT Late Interaction via `LateInteractionTextEmbedding("answerdotai/answerai-colbert-small-v1")`
 
-**4. `rapidfuzz` (The Title Matcher)**
-You need to verify OpenAlex returned the correct paper using a `0.85` string similarity. `rapidfuzz` is the modern standard — written in C++, highly accurate, and resolves Levenshtein distances in microseconds.
+**5. `instructor` & `litellm` (The LLM Router Layer)**
+The stack uses both libraries in tandem because they serve distinct architectural purposes:
+- **`litellm` (Network/Routing):** Acts as a routing layer to intelligently direct complex tasks to cloud providers (e.g., Claude 3.5 Sonnet on OpenRouter) while sending simple tasks to local Ollama (`gemma4:12b`). It handles API standardization, retries, and fallbacks.
+- **`instructor` (Parsing/Validation):** Sits on top of the routing layer. It forces the LLM to return exactly the Pydantic schema required (`from_provider("ollama/gemma4:12b")` or wrapped OpenAI client), guaranteeing 100% valid JSON responses and eliminating brittle regex parsing.
 
-**5. `tenacity` (The Circuit Breaker)**
-Your spec requires retry logic with exponential backoff for external API calls (OpenAlex, Semantic Scholar, ORCID). `tenacity` lets you simply add `@retry(wait=wait_exponential(multiplier=1, min=2, max=8))` above your HTTP calls, and it handles the entire backoff, retry, and failure logging elegantly.
+**6. `hishel` & `redis[hiredis]` (The Caching Layer)**
+`hishel` implements RFC 9111 compliant HTTP caching. By wrapping our `httpx` client, it transparently caches identical OpenAlex or Semantic Scholar responses in Redis, eliminating redundant network calls and saving API credits. Redis also powers distributed locks (`redis.lock`) to prevent race conditions during custom keyword creation.
 
-**6. `httpx` (Async HTTP)**
-All external API calls (OpenAlex, Semantic Scholar, ORCID) run concurrently via `asyncio.gather()`. `httpx` is the standard async HTTP client for Python, replacing `requests` for async workloads.
+**7. `pyalex` (OpenAlex Client)**
+The official client for OpenAlex. **Note:** The `mailto` polite pool was deprecated in Feb 2026. The client must be configured with an API key: `pyalex.config.api_key = "<your_key>"`.
 
-**7. `ruff` (DevEx)**
-If you are starting a new Python service today, use `ruff`. It replaces Black, Flake8, and isort, and runs in milliseconds. It enforces ultra-clean codebase standards.
+**8. `logfire` (Observability)**
+OpenTelemetry native instrumentation. By simply calling `logfire.instrument_fastapi(app)` and `logfire.instrument_openai(client)`, you gain zero-config dashboards showing exact latencies of Pydantic validations, HTTP requests, Qdrant queries, and LLM generations.
 
 ---
 
 ### Packages NOT needed
 
-| Package | Reason |
-|---|---|
-| `anthropic` | Not using Claude. All LLM calls go through Ollama's OpenAI-compatible API. |
-| `transformers` / `torch` | Not needed. Embeddings are via Ollama (`qwen3-embedding:8`) and `fastembed`. Reranking is via Ollama (`Qwen3-Reranker-4B`). |
-| `ollama` (pip package) | Not needed. We use the `openai` SDK pointed at Ollama's OpenAI-compatible endpoint. Simpler and works with `instructor`. |
-| `langchain` | Unnecessary abstraction for this service. Direct API calls are simpler. |
+| Package                  | Reason                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `uvicorn`                | Replaced by the much faster Rust-based `granian`.                                             |
+| `python-dotenv`          | Replaced by `pydantic-settings` which offers type safety and validation.                      |
+| `transformers` / `torch` | Not needed. Embeddings run via `fastembed` (ONNX) and Ollama.                                 |
+| `ollama` (pip package)   | Not needed. We use the standard `openai` SDK pointing to Ollama's OpenAI-compatible endpoint. |
+| `langchain`              | Unnecessary abstraction. Direct API calls are simpler and more maintainable.                  |
+| `beautifulsoup4`         | LLM-based data cleaning handles dirty text without brittle HTML parsing.                      |
+| `polars`                 | DataFrames are useless for single-payload JSON API operations.                                |
 
 ---
 
-### Ollama Setup on Mac M2
+### Tool Configurations (ruff, pyright, pytest)
 
-The following models must be available on the Ollama instance:
+These tools are configured in the `[tool.*]` sections of `pyproject.toml`:
 
-```bash
-# Pull models
-ollama pull qwen3-embedding:8
-ollama pull dengcao/Qwen3-Reranker-4B:Q5_K_M
-ollama pull gemma4:12b
-
-# Verify models are loaded
-ollama list
-
-# Start Ollama server (if not already running as a service)
-ollama serve
-```
-
-**Ollama API endpoints used by the service:**
-
-| Purpose | Endpoint | Model |
-|---|---|---|
-| Text embedding | `POST /v1/embeddings` | `qwen3-embedding:8` |
-| LLM chat (taxonomy selection, data cleaning) | `POST /v1/chat/completions` | `gemma4:12b` |
-| Reranking | Custom endpoint or via chat with scoring prompt | `dengcao/Qwen3-Reranker-4B:Q5_K_M` |
-
-**Note on reranking:** Ollama does not natively expose a cross-encoder reranking endpoint. The reranker model can be used via the chat completion endpoint with a specifically formatted prompt that asks for relevance scores. Alternatively, if `fastembed` supports the reranker model, it can be used directly.
+- **ruff**: Replaces Black, Flake8, and isort. Enforces modern syntax.
+- **pyright**: Configured for strict type checking mode.
+- **pytest-asyncio**: Configured with `asyncio_mode = "auto"`.

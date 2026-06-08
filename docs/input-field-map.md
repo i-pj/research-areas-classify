@@ -139,6 +139,8 @@ The `old_crm_data` object contains 300+ fields from the legacy CRM. Most are irr
 
 ### Input fields used as search keys
 
+*Note: Accessing the OpenAlex high-performance tier requires configuring a mandatory `api_key`. The legacy `mailto` polite pool was deprecated in Feb 2026.*
+
 | Input Field | Used To |
 |---|---|
 | `basic_information.first_name` + `last_name` | Search OpenAlex/ORCID/Semantic Scholar by author name |
@@ -172,3 +174,18 @@ The `old_crm_data` object contains 300+ fields from the legacy CRM. Most are irr
 
 If the author is not found on any external platform, `author_details` should contain only `user_id` and empty/null fields for everything else. Do not fall back to copying input data — n8n already has it.
 
+---
+
+## Field Mapping: Input → Qdrant `reviewer_profiles` Payload
+
+When `/research-areas/classify` processes the `input-from-n8n.json` payload, if the user is identified as a reviewer (`old_crm_data.source_roles` contains `"reviewer"`), the service uses the extracted data to upsert their profile into the `reviewer_profiles` Qdrant collection.
+
+| Qdrant Vector/Payload | Source Data from n8n Payload / Enrichment | Notes |
+|---|---|---|
+| **`interests_dense`** | `old_crm_data.reviewer[].phdstream`, `old_crm_data.keywords` | Embedded via `qwen3-embedding:8`. Requires LLM string cleaning. |
+| **`pubs_dense`** | OpenAlex Paper Search (from `article_details` or `authorData.titleOfPaper`) | Embedded via `qwen3-embedding:8`. Uses the concatenated abstracts of their top 5 works. |
+| **`bm25` / `colbert_pubs`** | Combined text of interests and publications | Sparse and token-level multivectors generated via `fastembed`. |
+| `payload.user_id` | `user_id` | **Required** for matching CRM availability status. |
+| `payload.openalex_id` | OpenAlex Author Search | Discovered during the enrichment stage. |
+| `payload.institution_ids` | OpenAlex Author Search -> `affiliations[].institution.id` | **Required** for CoI filtering (institutional conflict). |
+| `payload.coauthor_openalex_ids` | OpenAlex Works `group_by` query | **Required** for CoI filtering (collaboration conflict). See `reviewer-service.md`. |
