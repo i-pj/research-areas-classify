@@ -17,7 +17,6 @@ dependencies = [
     "granian>=1.6.0",            # Rust-based ASGI server (massive throughput lift over Uvicorn)
     "pydantic>=2.9.0",           # Core data validation (Rust-backed pydantic-core)
     "pydantic-settings>=2.5.0",  # Type-safe environment variable management
-    "orjson>=3.10.0",            # Rust-based JSON serialization for custom high-perf tasks (e.g. numpy arrays)
 
     # --- LLM & Structured Outputs ---
     "instructor>=1.7.0",         # Forces LLMs to return valid Pydantic JSON (from_provider API)
@@ -63,8 +62,8 @@ dev = [
 **1. `granian` (The ASGI Server)**
 `granian` is a Rust-based HTTP server for Python applications. It provides native HTTP/2 support, built-in process management, and significantly higher throughput than `uvicorn`. No `gunicorn` wrapper is needed. You simply run: `granian --interface asgi --workers 4 main:app`.
 
-**2. `pydantic` and `orjson` Serialization**
-FastAPI natively uses Pydantic v2's Rust-based `pydantic-core` for extremely fast JSON serialization. **We explicitly DO NOT use `ORJSONResponse` as the default FastAPI response class because it is deprecated.** However, the `orjson` library is retained in the stack because it provides unique, high-performance capabilities for custom serialization tasks, such as serializing/deserializing NumPy arrays output by embedding operations.
+**2. `pydantic` Serialization**
+FastAPI natively uses Pydantic v2's Rust-based `pydantic-core` for extremely fast JSON serialization. **We explicitly DO NOT use `ORJSONResponse` as the default FastAPI response class because it is deprecated.**
 
 **3. NumPy vs. Polars (Data Manipulation)**
 We **exclusively use NumPy** and **reject Polars**.

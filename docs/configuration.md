@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: SecretStr | None = None
     qdrant_collection: str = "research_taxonomy"
+    reviewer_collection: str = "reviewer_profiles"
 
     # OpenAlex (mandatory API key since Feb 2026)
     openalex_api_key: SecretStr
@@ -45,6 +46,13 @@ class Settings(BaseSettings):
     # Retrieval Tuning Weights
     colbert_weight: float = 0.6
     composite_weight: float = 0.4
+    
+    # Reviewer Matching Weights & Limits
+    colbert_weight_reviewer: float = 0.6
+    composite_weight_reviewer: float = 0.4
+    temporal_decay_lambda: float = 0.15
+    stage1_candidate_limit: int = 50
+    stage2_rescore_limit: int = 15
 
     # LiteLLM (optional)
     openrouter_api_key: SecretStr | None = None
@@ -71,6 +79,7 @@ def get_settings():
 | `OLLAMA_BASE_URL` | `str` | `http://localhost:11434` | No | URL to the Ollama instance (use Tailscale MagicDNS). |
 | `QDRANT_URL` | `str` | `http://localhost:6333` | No | URL to the Qdrant instance. |
 | `QDRANT_API_KEY` | `SecretStr` | `None` | No | Defense-in-depth API key for Qdrant. |
+| `REVIEWER_COLLECTION` | `str` | `reviewer_profiles` | No | Qdrant collection name for reviewer profiles. |
 | `OPENALEX_API_KEY` | `SecretStr` | — | **Yes** | Mandatory API key for OpenAlex (polite pool deprecated). |
 | `ORCID_CLIENT_ID` | `str` | — | **Yes** | Public API client ID for ORCID. |
 | `ORCID_CLIENT_SECRET` | `SecretStr`| — | **Yes** | Public API client secret for ORCID. |

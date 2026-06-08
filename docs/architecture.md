@@ -11,11 +11,11 @@
 │  │  (Merge1 → HTTP POST) │───────┐  │         │  ├─ qwen3-embedding:8         │  │
 │  └───────────────────────┘       │  │         │  └─ gemma4:12b                │  │
 │                                  │  │         │  └───────────────────────────────┘  │
-│  ┌───────────────────────┐       │  │         │                                     │
-│  │  FastAPI Service       │◄──────┘  │         │  ┌───────────────────────────────┐  │
-│  │  (Granian, Hishel,     │─────────┼─Tailnet─┼─►│  Qdrant                       │  │
-│  │   LiteLLM Router)      │         │         │  │  (research_taxonomy)          │  │
-│  │  ├─ FastEmbed (ColBERT)│─────────┼─Tailnet─┼─►│  Port: 6333 (REST)            │  │
+│  ┌───────────────────────┐       │  │         │  ┌───────────────────────────────┐  │
+│  │  FastAPI Service       │◄──────┘  │         │  │  Qdrant                       │  │
+│  │  (Granian, Hishel,     │─────────┼─Tailnet─┼─►│  │  - research_taxonomy        │  │
+│  │   LiteLLM Router)      │         │         │  │  │  - reviewer_profiles        │  │
+│  │  ├─ FastEmbed (ColBERT)│─────────┼─Tailnet─┼─►│  │  Port: 6333 (REST)            │  │
 │  │  └─ FastEmbed (BM25)   │         │         │  └───────────────────────────────┘  │
 │  └───────────────────────┘          │         │                                     │
 │         │                           │         └─────────────────────────────────────┘
@@ -36,7 +36,7 @@
 └─────────────────────────────────────┘
 ```
 
-## Request Flow
+## Request Flow (Taxonomy Classification)
 
 ```
 1. n8n Merge1 node produces merged author payload
@@ -125,11 +125,15 @@ export OLLAMA_HOST="0.0.0.0:11434"      # Bind to Tailscale interface
 | Model | Source | Purpose |
 |---|---|---|
 | `Qdrant/bm25` | FastEmbed | BM25 sparse vectors (CPU only) |
-| `colbert-ir/colbertv2.0` | FastEmbed | ColBERT late interaction (128-dim per-token, CPU only) |
+| `answerdotai/answerai-colbert-small-v1` | FastEmbed | ColBERT late interaction (96-dim per-token, CPU only) |
 
 ## Qdrant Collection Config
 
-The collection uses a **4-vector architecture** optimized for multivector ColBERT rescoring.
+The system hosts **two distinct collections** on the Mac's Qdrant instance, both sharing the same underlying models but serving different entities.
+
+### 1. `research_taxonomy` Collection
+
+This collection uses a **4-vector architecture** optimized for multivector ColBERT rescoring of taxonomy terms.
 
 ```python
 client.create_collection(
@@ -138,7 +142,7 @@ client.create_collection(
         "dense_512": models.VectorParams(size=512, distance=models.Distance.COSINE),
         "dense_4096": models.VectorParams(size=4096, distance=models.Distance.COSINE),
         "colbert": models.VectorParams(
-            size=128,  # colbert-ir/colbertv2.0
+            size=96,  # answerdotai/answerai-colbert-small-v1
             distance=models.Distance.COSINE,
             multivector_config=models.MultiVectorConfig(
                 comparator=models.MultiVectorComparator.MAX_SIM
@@ -152,6 +156,38 @@ client.create_collection(
 )
 ```
 *Note: For 70K taxonomy records, this configuration requires ~3.3GB - 3.5GB of persistent storage, with ColBERT multivectors accounting for roughly 60% of that total.*
+
+### 2. `reviewer_profiles` Collection
+
+A specialized collection storing ~4,000 reviewer profiles, using a **5-vector architecture** separating publication expertise from declared interests.
+
+```python
+client.create_collection(
+    collection_name="reviewer_profiles",
+    vectors_config={
+        "pubs_dense_512": models.VectorParams(size=512, distance=models.Distance.COSINE),
+        "pubs_dense_4096": models.VectorParams(size=4096, distance=models.Distance.COSINE),
+        "interests_dense_512": models.VectorParams(size=512, distance=models.Distance.COSINE),
+        "interests_dense_4096": models.VectorParams(size=4096, distance=models.Distance.COSINE),
+        "colbert_pubs": models.VectorParams(
+            size=96,  # answerdotai/answerai-colbert-small-v1
+            distance=models.Distance.COSINE,
+            multivector_config=models.MultiVectorConfig(
+                comparator=models.MultiVectorComparator.MAX_SIM
+            ),
+            hnsw_config=models.HnswConfigDiff(m=0),
+        ),
+    },
+    sparse_vectors_config={
+        "bm25": models.SparseVectorParams(modifier=models.Modifier.IDF)
+    },
+)
+# Payload indexes required for CoI filtering at query time:
+client.create_payload_index("reviewer_profiles", "institution_ids", field_schema=models.PayloadSchemaType.KEYWORD)
+client.create_payload_index("reviewer_profiles", "coauthor_openalex_ids", field_schema=models.PayloadSchemaType.KEYWORD)
+client.create_payload_index("reviewer_profiles", "user_id", field_schema=models.PayloadSchemaType.INTEGER)
+```
+*Note: For ~4K reviewers, this requires ~500MB of storage. CoI payload indexes ensure exact, rapid exclusion of conflicted reviewers.*
 
 ## Network & Security Overview
 

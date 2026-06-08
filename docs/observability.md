@@ -40,7 +40,9 @@ Trace propagation happens automatically across the stack:
 
 ## 3. Pipeline Metric Spans
 
-For complex retrieval pipelines, we emit custom spans to benchmark each stage independently. This helps answer questions like, *"Is the ColBERT rescoring taking too long compared to the dense fetch?"*
+For complex retrieval pipelines, we emit custom spans to benchmark each stage independently. This allows us to track performance across both the taxonomy classification and reviewer recommendation pipelines.
+
+### Taxonomy Classification Pipeline
 
 ```python
 with logfire.span("stage_4_hybrid_search"):
@@ -56,7 +58,25 @@ with logfire.span("stage_7_llm_selection", candidates_count=len(candidates)):
     pass
 ```
 
+### Reviewer Recommendation Pipeline
+
+```python
+with logfire.span("reviewer_match.stage1_hybrid_retrieval", manuscript_id=ms_id):
+    # Qdrant hybrid retrieval + CoI filtering
+    pass
+
+with logfire.span("reviewer_match.stage2_colbert_rescore", candidates_count=len(candidates)):
+    # ColBERT MaxSim rescoring
+    pass
+
+with logfire.span("reviewer_match.stage3_llm_judge", top_k=len(rescored)):
+    # LLM-as-a-judge structured evaluations
+    pass
+```
+
 ### Key Metrics to Monitor
 1. **Cache Hit Ratios**: Monitor the frequency of Redis hits vs. live OpenAlex API calls.
-2. **ColBERT Rescoring Latency**: Ensure the CPU overhead of evaluating multi-vector similarities locally remains within acceptable limits (< 300ms).
+2. **ColBERT Rescoring Latency**: Ensure the CPU overhead of evaluating multi-vector similarities locally remains within acceptable limits (< 300ms for 50 reviewer candidates).
 3. **Pydantic Validation Exceptions**: High rates of validation errors from Instructor mean the LLM is failing to adhere to the schema and wasting retry budgets.
+4. **Reviewer Acceptance Rate**: Track over time to ensure the system is yielding actionable recommendations.
+5. **CoI False Negatives**: Monitor to ensure the OpenAlex `group_by` filter successfully eliminates conflicted reviewers.

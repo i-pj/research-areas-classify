@@ -225,7 +225,7 @@ The FastAPI service on Dokploy communicates with Ollama and Qdrant on the Mac vi
 | Model | Purpose |
 |---|---|
 | `Qdrant/bm25` | BM25 sparse vectors |
-| `colbert-ir/colbertv2.0` | ColBERT late interaction (128-dim per-token) |
+| `answerdotai/answerai-colbert-small-v1` | ColBERT late interaction (96-dim per-token) |
 
 ### Embedding model details
 
@@ -261,7 +261,7 @@ The Qdrant collection stores **taxonomy records only**. Author data is never sto
   "vectors": {
     "dense_512": { "size": 512, "distance": "Cosine" },
     "dense_4096": { "size": 4096, "distance": "Cosine" },
-    "colbert": { "size": 128, "distance": "Cosine", "multivector_config": {"comparator": "MaxSim"} }
+    "colbert": { "size": 96, "distance": "Cosine", "multivector_config": {"comparator": "MaxSim"} }
   },
   "sparse_vectors": {
     "bm25": {}
@@ -597,7 +597,6 @@ After Qdrant returns the RRF-fused results, assign additive boosts based on exte
 - OpenAlex topic match: +0.15
 - Classification hint match (e.g., arXiv cs.CV): +0.10
 
-### Stage 6 — ColBERT Late Interaction Rescoring
 ### Stage 6 — ColBERT Late Interaction Rescoring
 Pass the FastEmbed-generated query multivector to Qdrant's native query API to rescore the RRF-fused shortlist. **FastEmbed is only used to encode the query tensor on Dokploy**; the actual token-level MaxSim comparison is executed natively by Qdrant.
 `final_score = (colbert_maxsim × 0.6) + (composite_score × 0.4)`
